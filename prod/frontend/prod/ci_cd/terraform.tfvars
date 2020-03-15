@@ -1,0 +1,1 @@
+project_name = "frontend_codebuild_prod"
