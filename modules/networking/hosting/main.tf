@@ -1,20 +1,43 @@
 
-provider "aws" {
-  region = "us-east-1"
+locals {
+
+  dub_domains = [for domain in var.domains: "www.${domain}"]
+  # prod_domain = "www.${var.prod_site_name}"
+  # staging_domain = "www.${var.staging_site_name}"
 }
 
-terraform {
-  backend "s3" {
-    bucket         = "sps-terraform-backend"
-    key            = "hosting/terraform.tfstate"
-    region         = "us-east-2"
-    dynamodb_table = "sps-terraform-locks"
-    encrypt        = true
+data "aws_canonical_user_id" "current_user" {}
+
+# Recommend not managing your Route53 with terraform considering 
+# how many records you'll be adding from a variety of sources. 
+# You don't want to accidentally overwrite those.
+data "aws_route53_zone" "main" {
+  name = var.prod_site_name
+}
+
+# data "template_file" "prod_bucket_policy" {
+#   template = "${file("../../iam/policy_templates/hosting-bucket-policy.tpl")}"
+#   vars = {
+#     originAccessIdentityArn = aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn
+#     bucketName = local.prod_domain
+#   }
+# }
+
+data "template_file" "bucket_policies" {
+  count = length(var.domains)
+  template = "${file("../../iam/policy_templates/hosting-bucket-policy.tpl")}"
+  vars = {
+    originAccessIdentityArn = aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn
+    bucketName = local.staging_domain
   }
 }
-resource "aws_acm_certificate" "cert" {
-  domain_name = "*.artspot.io"
-  validation_method = "DNS"
+
+data "template_file" "_bucket_policy" {
+  template = "${file("../../iam/policy_templates/hosting-bucket-policy.tpl")}"
+  vars = {
+    originAccessIdentityArn = aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn
+    bucketName = local.staging_domain
+  }
 }
 
 resource "aws_s3_bucket" "prod_site_logs" {
@@ -42,10 +65,12 @@ resource "aws_s3_bucket" "staging_site_logs" {
 }
 
 resource "aws_s3_bucket" "prod_site_bucket" {
-  bucket = "www.${var.prod_site_name}"
+  bucket = local.prod_domain
+  policy = data.template_file.prod_bucket_policy.rendered
+  
   logging {
     target_bucket = aws_s3_bucket.prod_site_logs.bucket
-    target_prefix = "www.${var.prod_site_name}/"
+    target_prefix = "${local.prod_domain}/"
   }
 
   versioning {
@@ -56,14 +81,28 @@ resource "aws_s3_bucket" "prod_site_bucket" {
     // These are the same because React is a SPA
     index_document = "index.html"
     error_document = "index.html"
+  }
+
+  grant {
+    id         = data.aws_canonical_user_id.current_user.id
+    type       = "CanonicalUser"
+    permissions = ["FULL_CONTROL"]
+  }
+
+  grant {
+    id         = aws_cloudfront_origin_access_identity.origin_access_identity.s3_canonical_user_id 
+    type       = "CanonicalUser"
+    permissions = ["FULL_CONTROL"]
   }
 }
 
 resource "aws_s3_bucket" "staging_site_bucket" {
-  bucket = "www.${var.staging_site_name}"
+  bucket = local.staging_domain
+  policy = data.template_file.staging_bucket_policy.rendered
+
   logging {
     target_bucket = aws_s3_bucket.staging_site_logs.bucket
-    target_prefix = "www.${var.staging_site_name}/"
+    target_prefix = "${local.staging_domain}/"
   }
 
   versioning {
@@ -74,6 +113,18 @@ resource "aws_s3_bucket" "staging_site_bucket" {
     // These are the same because React is a SPA
     index_document = "index.html"
     error_document = "index.html"
+  }
+
+  grant {
+    id         = data.aws_canonical_user_id.current_user.id
+    type       = "CanonicalUser"
+    permissions = ["FULL_CONTROL"]
+  }
+
+  grant {
+    id         = aws_cloudfront_origin_access_identity.origin_access_identity.s3_canonical_user_id 
+    type       = "CanonicalUser"
+    permissions = ["FULL_CONTROL"]
   }
 }
 
@@ -86,14 +137,20 @@ resource "aws_cloudfront_distribution" "prod_website_cdn" {
   enabled      = true
   price_class  = "PriceClass_All"
   http_version = "http2"
-  aliases = ["www.${var.prod_site_name}"]
+  aliases = ["${local.prod_domain}"]
 
   origin {
     origin_id   = "origin-bucket-${aws_s3_bucket.prod_site_bucket.id}"
-    domain_name = "www.${var.prod_site_name}.s3.amazonaws.com"
+    domain_name = "${local.prod_domain}.s3.amazonaws.com"
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
+    }
+  }
+
+  restrictions {
+   geo_restriction {
+      restriction_type = "none"
     }
   }
 
@@ -120,14 +177,8 @@ resource "aws_cloudfront_distribution" "prod_website_cdn" {
     }
   }
 
-   logging_config {
-    include_cookies = false
-    bucket          = "mylogs.s3.amazonaws.com"
-    prefix          = "myprefix"
-  }
-
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate.cert.arn
+    acm_certificate_arn      = var.acm_arn_by_domain[var.prod_domain]
     ssl_support_method       = "sni-only"
   }
 }
@@ -136,14 +187,20 @@ resource "aws_cloudfront_distribution" "staging_website_cdn" {
   enabled      = true
   price_class  = "PriceClass_All"
   http_version = "http2"
-  aliases = ["www.${var.staging_site_name}"]
+  aliases = ["${local.staging_domain}"]
 
   origin {
     origin_id   = "origin-bucket-${aws_s3_bucket.staging_site_bucket.id}"
-    domain_name = "www.${var.staging_site_name}.s3.amazonaws.com"
+    domain_name = "${local.staging_domain}.s3.amazonaws.com"
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
+    }
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
     }
   }
 
@@ -152,7 +209,7 @@ resource "aws_cloudfront_distribution" "staging_website_cdn" {
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD" ]
     cached_methods   = ["GET", "HEAD" ]
-    target_origin_id = "origin-bucket-${aws_s3_bucket.prod_site_bucket.id}"
+    target_origin_id = "origin-bucket-${aws_s3_bucket.staging_site_bucket.id}"
 
     min_ttl          = "0"
     default_ttl      = "300"                                              //3600
@@ -163,7 +220,6 @@ resource "aws_cloudfront_distribution" "staging_website_cdn" {
 
     forwarded_values {
       query_string = false
-
       cookies {
         forward = "none"
       }
@@ -171,18 +227,14 @@ resource "aws_cloudfront_distribution" "staging_website_cdn" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate.cert.arn
+    acm_certificate_arn      = var.acm_arn_by_domain[var.staging_domain]
     ssl_support_method       = "sni-only"
   }
 }
-// Imported
-resource "aws_route53_zone" "artspot" {
-  name = "artspot.io"
-}
 
 resource "aws_route53_record" "www_prod_cdn_A_record" {
-  zone_id = aws_route53_zone.artspot.zone_id
-  name = "www.${var.prod_site_name}"
+  zone_id = data.aws_route53_zone.main.zone_id
+  name = local.prod_domain
   type = "A"
   alias {
     name = aws_cloudfront_distribution.prod_website_cdn.domain_name
@@ -192,8 +244,8 @@ resource "aws_route53_record" "www_prod_cdn_A_record" {
 }
 
 resource "aws_route53_record" "www_prod_cdn_AAAA_record" {
-  zone_id = aws_route53_zone.artspot.zone_id
-  name = "www.${var.prod_site_name}"
+  zone_id = data.aws_route53_zone.main.zone_id
+  name = local.prod_domain
   type = "AAAA"
   alias {
     name = aws_cloudfront_distribution.prod_website_cdn.domain_name
@@ -204,8 +256,8 @@ resource "aws_route53_record" "www_prod_cdn_AAAA_record" {
 
 
 resource "aws_route53_record" "www_staging_cdn_A_record" {
-  zone_id = aws_route53_zone.artspot.zone_id
-  name = "www.${var.staging_site_name}"
+  zone_id = data.aws_route53_zone.main.zone_id
+  name = local.staging_domain
   type = "A"
   alias {
     name = aws_cloudfront_distribution.staging_website_cdn.domain_name
@@ -215,8 +267,8 @@ resource "aws_route53_record" "www_staging_cdn_A_record" {
 }
 
 resource "aws_route53_record" "www_staging_cdn_AAAA_record" {
-  zone_id = aws_route53_zone.artspot.zone_id
-  name = "www.${var.staging_site_name}"
+  zone_id = data.aws_route53_zone.main.zone_id
+  name = local.staging_domain
   type = "AAAA"
   alias {
     name = aws_cloudfront_distribution.staging_website_cdn.domain_name
