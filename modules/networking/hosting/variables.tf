@@ -1,40 +1,40 @@
-variable "acm_cert_arn_by_domain" {
-  type = map(string)
-  default = null
-  description = "Mapping of acm arns by domain."
-}
-
-variable "use_same_acm_cert" {
-  type = bool
-  default = true
-  description = "Whether to use the same ACM certificate for each of your domains. If true, only route53_zone_id will be used."
-}
-
-variable "acm_cert_arn" {
+variable "domain" {
   type = string
-  default = null
-  description = "Sole ACM certificate to be used if use_same_acm_cert is set to true."
-}
-
-variable "domains" {
-  type = list(string)
-  description = "List of domains to host (without www.)"
-}
-
-variable "use_same_route53_zone" {
-  type = bool
-  default = true
-  description = "Whether to use the same Route53 zone for each of your domains. If true, only route53_zone_id will be used."
+  description = "Domain to host (without www.)"
 }
 
 variable "route53_zone_id" {
   type = string
   default = null
-  description = "The sole Route53 zone to use for each of your domains if use_same_route_53_zone is set to true."
+  description = "Route 53 zone for your domain records. If this is not supplied, it will look for one under your input domain"
 }
 
-variable "route53_zone_ids_by_domain" {
-  type = map(string)
+variable "site_bucket_policy" {
+  type = string
   default = null
-  description = "The Route53 Terraform ids mapped by domain."
+  description = "Override s3 bucket policy for your hosting bucket."
+}
+
+variable "log_bucket_policy" {
+  type = string
+  default = null
+  description = "Override s3 bucket policy for your log bucket. Default is none."
+}
+
+variable "index_document" {
+  type = string
+  default = "index.html"
+  description = "Cloudfront index document."
+}
+
+variable "error_document" {
+  type = string
+  default = "index.html"
+  description = "Cloudfront error document. Defaults to index for SPAs but an be overriden for mmore traditional websites."
+}
+
+variable "acm_cert_arn" {
+  type = string
+  default = null
+  description = "Your domains acm cert. If this is not supplied, it will look for one under www.{your domain}."
 }

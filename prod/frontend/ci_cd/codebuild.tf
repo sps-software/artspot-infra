@@ -37,6 +37,36 @@ resource "aws_codebuild_project" "artspot-web-build-prod" {
           type  = "PLAINTEXT"
           value = "prod"
       }
+
+      environment_variable {
+          name  = "ClientCognitoWebId"
+          type  = "PARAMETER_STORE"
+          value = "/artspot/${var.environment}/cognito/user_pool_web_client_id"
+      }
+
+      environment_variable {
+          name  = "ClientCognitoPoolId"
+          type  = "PARAMETER_STORE"
+          value = "/artspot/${var.environment}/cognito/user_pool_id"
+      }
+
+       environment_variable {
+          name  = "CognitoRegion"
+          type  = "PLAINTEXT"
+          value = "us-east-2"
+      }
+
+        environment_variable {
+          name  = "Distribution"
+          type  = "PARAMETER_STORE"
+          value = "/artspot/networking/${var.environment}/distribution_id"
+      }
+
+       environment_variable {
+          name  = "DeployBucket"
+          type  = "PLAINTEXT"
+          value = "www.artspot.io"
+      }
   }
 
   logs_config {

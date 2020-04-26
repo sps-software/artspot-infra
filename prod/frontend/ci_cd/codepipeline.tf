@@ -9,20 +9,21 @@ data "aws_iam_role" "codepipeline_service_role" {
 
 module "artspot-web-codepipeline" {
   source     = "../../../modules/ci_cd/codepipeline"
-  name       = "artspot-web"
+  name       = "art-spot-web"
   aws_region = "us-east-2"
   role_arn         = data.aws_iam_role.codepipeline_service_role.arn
   environment      = "prod"
   sourceGithubUser = "sps-software"
-  sourceRepo       = "artspot-web"
+  sourceRepo       = "art-spot-web"
   stages = [
     {
       name = aws_codebuild_project.artspot-web-build-prod.name
-      actions = [{
+      actions = [
+        {
         category = "Build",
         provider = "CodeBuild",
         configuration    = {
-            "ProjectName" = "artspot-web-build"
+            "ProjectName" = aws_codebuild_project.artspot-web-build-prod.name
         }
         input_artifacts  = [
             "SourceArtifact",

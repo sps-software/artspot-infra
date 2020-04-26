@@ -45,7 +45,7 @@ variable "sourceRepo" {
 }
 
 variable "pollForSourceChanges" {
-  default = false
+  default = true
   type = bool
 }
 

@@ -5,6 +5,26 @@ locals {
 resource "aws_s3_bucket" "this" {
   bucket = "${var.name}-bucket${local.environment_ext}"
   acl    = "private"
+#  policy      = jsonencode(
+#       {
+#           Statement = [
+#               {
+#                   Action   = [
+#                       "s3:PutObject",
+#                       "s3:GetObject",
+#                       "s3:GetObjectVersion",
+#                       "s3:GetBucketAcl",
+#                       "s3:GetBucketLocation",
+#                   ]
+#                   Effect   = "Allow"
+#                   Resource = [
+#                       "arn:aws:s3:::codepipeline-us-east-2-*",
+#                   ]
+#               },   
+#           ]
+#           Version   = "2012-10-17"
+#       }
+#   )
 }
 
 resource "aws_codepipeline" "this" {
