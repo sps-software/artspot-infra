@@ -31,10 +31,10 @@ resource "aws_iam_policy" "CodeBuildBasePolicy-artspot-web-build-us-east-2" {
                   ]
                   Effect   = "Allow"
                   Resource = [
-                      "arn:aws:s3:::art-spot-web-bucket-prod",
-                      "arn:aws:s3:::art-spot-web-bucket-prod/*",
-                      "arn:aws:s3:::art-spot-web-bucket-staging",
-                      "arn:aws:s3:::art-spot-web-bucket-staging/*"
+                      "arn:aws:s3:::art-spot-web-pipeline-bucket-prod",
+                      "arn:aws:s3:::art-spot-web-pipeline-bucket-prod/*",
+                      "arn:aws:s3:::art-spot-web-pipeline-bucket-staging",
+                      "arn:aws:s3:::art-spot-web-pipeline-bucket-staging/*"
                   ]
               },
               {

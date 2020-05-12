@@ -1,20 +1,20 @@
 
 data "aws_iam_role" "codebuild_service_role" {
-  name = "codebuild-artspot-web-build-service-role"
+  name = "codebuild-${var.project_name}-web-build-service-role"
 }
 
-resource "aws_codebuild_project" "artspot-web-build-prod" {
+resource "aws_codebuild_project" "this" {
   badge_enabled  = false
   build_timeout  = 60
   encryption_key = "arn:aws:kms:us-east-2:455728032032:alias/aws/s3"
-  name           = "artspot-web-build-prod"
+  name           = "${var.project_name}-web-build-${var.environment}"
   queued_timeout = 480
   service_role   = data.aws_iam_role.codebuild_service_role.arn
   tags           = {}
 
   artifacts {
       encryption_disabled    = false
-      name                   = "artspot-web-build"
+      name                   = "${var.project_name}-web-build"
       override_artifact_name = false
       packaging              = "NONE"
       type                   = "CODEPIPELINE"
@@ -35,19 +35,19 @@ resource "aws_codebuild_project" "artspot-web-build-prod" {
       environment_variable {
           name  = "stage"
           type  = "PLAINTEXT"
-          value = "prod"
+          value = var.environment
       }
 
       environment_variable {
           name  = "ClientCognitoWebId"
           type  = "PARAMETER_STORE"
-          value = "/artspot/${var.environment}/cognito/user_pool_web_client_id"
+          value = "/${var.project_name}/${var.environment}/cognito/user_pool_web_client_id"
       }
 
       environment_variable {
           name  = "ClientCognitoPoolId"
           type  = "PARAMETER_STORE"
-          value = "/artspot/${var.environment}/cognito/user_pool_id"
+          value = "/${var.project_name}/${var.environment}/cognito/user_pool_id"
       }
 
        environment_variable {
@@ -59,13 +59,13 @@ resource "aws_codebuild_project" "artspot-web-build-prod" {
         environment_variable {
           name  = "Distribution"
           type  = "PARAMETER_STORE"
-          value = "/artspot/networking/${var.environment}/distribution_id"
+          value = "/${var.project_name}/networking/${var.environment}/distribution_id"
       }
 
        environment_variable {
           name  = "DeployBucket"
           type  = "PLAINTEXT"
-          value = "www.artspot.io"
+          value = var.deploy_bucket
       }
   }
 

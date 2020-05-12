@@ -1,7 +1,3 @@
-variable "region" {
-  type = string
-}
-
 variable "project_name" {
   type = string
 }
@@ -12,4 +8,9 @@ variable "environment" {
 
 variable "deploy_bucket" {
   type = string
+}
+
+variable "sourceBranch" {
+  type = string
+  default = "master"
 }

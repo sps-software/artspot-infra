@@ -4,7 +4,7 @@ locals {
 
 resource "aws_cognito_user_pool_domain" "domain" {
     user_pool_id = aws_cognito_user_pool.artists.id
-    domain       = "artspot"
+    domain       = var.domain
 }
 
 resource "aws_cognito_user_pool" "artists" {

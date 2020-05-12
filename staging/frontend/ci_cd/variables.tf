@@ -13,3 +13,7 @@ variable "environment" {
 variable "deploy_bucket" {
   type = string
 }
+
+variable "sourceBranch" {
+  type = string
+}

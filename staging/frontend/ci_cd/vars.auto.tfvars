@@ -1,0 +1,5 @@
+region="us-east-2"
+environment="staging"
+project_name ="artspot"
+deploy_bucket="www.staging.artspot.io"
+sourceBranch="develop"
