@@ -10,6 +10,10 @@ variable "auth_domain" {
   type = string
 }
 
-variable "aws_region" {
+variable "prod_api_domain" {
+  type = string
+}
+
+variable "staging_api_domain" {
   type = string
 }

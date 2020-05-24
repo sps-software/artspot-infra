@@ -1,8 +1,6 @@
-
-
 locals {
   total_subnets   = var.num_private_subnets + var.num_public_subnets
-  az_num_map      = { "0" = "a", "1" = "b", "2" = "b" }
+  az_num_map      = { "0" = "a", "1" = "b", "2" = "c" }
   environment_ext = "${var.environment == "" ? "" : "-"}${var.environment == "" ? "" : var.environment}"
   cidr_part_1_2   = regex("(\\d{1,3}.\\d{1,3}).\\d{1,3}.\\d{1,3}", var.vpc_cidr_block)[0]
   cidr_part3      = regex("\\d{1,3}.\\d{1,3}.(\\d{1,3}).\\d{1,3}", var.vpc_cidr_block)[0]
@@ -69,6 +67,8 @@ resource "aws_route_table" "this" {
 
 resource "aws_route_table_association" "prod-crta-public-subnet" {
   count          = var.num_public_subnets
-  subnet_id      = [for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][count.index].id
+  //It would be better to do:[for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][count.index].id
+  // but terraform has a but right now.
+  subnet_id      = aws_subnet.this[count.index].id
   route_table_id = var.custom_route_table_enabled ? aws_route_table.this[0].id : aws_vpc.this.default_route_table_id
 }

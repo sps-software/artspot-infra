@@ -15,6 +15,7 @@ module "artspot-web-codepipeline" {
   environment      = "${var.environment}"
   sourceGithubUser = "sps-software"
   sourceRepo       = "art-spot-web"
+  sourceBranch     = var.sourceBranch
   stages = [
     {
       name = aws_codebuild_project.this.name,

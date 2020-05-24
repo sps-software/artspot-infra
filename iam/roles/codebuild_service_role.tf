@@ -20,3 +20,5 @@ resource "aws_iam_role" "codebuild-artspot-web-build-service-role" {
   path                  = "/service-role/"
   tags                  = {}
 }
+
+//TODO: need to add policy role attachment here

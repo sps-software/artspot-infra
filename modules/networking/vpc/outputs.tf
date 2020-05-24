@@ -72,3 +72,6 @@ output "subnet_name_arn_map" {
   description = "a mapping of subnet ids to their corresponding arns"
 }
 
+output "aws_subnet" {
+  value = [for var in aws_subnet.this.* : var if var.map_public_ip_on_launch == true ]
+}
