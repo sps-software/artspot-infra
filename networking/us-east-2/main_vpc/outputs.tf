@@ -67,3 +67,18 @@ output "subnet_name_arn_map" {
   description = "a mapping of subnet ids to their corresponding arns"
 }
 
+output "public_subnet_cidr_blocks" {
+  value = module.main_vpc.public_subnet_cidr_blocks
+}
+
+output "private_subnet_cidr_blocks" {
+  value = module.main_vpc.private_subnet_cidr_blocks
+}
+
+output "public_cidr_blocks_by_id" {
+  value = module.main_vpc.public_cidr_blocks_by_id
+}
+
+output "private_cidr_blocks_by_id" {
+  value =  module.main_vpc.private_cidr_blocks_by_id
+}

@@ -67,8 +67,56 @@ resource "aws_route_table" "this" {
 
 resource "aws_route_table_association" "prod-crta-public-subnet" {
   count          = var.num_public_subnets
-  //It would be better to do:[for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][count.index].id
-  // but terraform has a but right now.
-  subnet_id      = aws_subnet.this[count.index].id
+  // It would be better to do:[for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][count.index].id
+  // but terraform has a bug right now.
+  subnet_id      = [for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][count.index].id
   route_table_id = var.custom_route_table_enabled ? aws_route_table.this[0].id : aws_vpc.this.default_route_table_id
+}
+
+# Elastic IPs for NAT
+resource "aws_eip" "nat_eip" {
+  count = var.num_public_subnets > 0 && var.num_private_subnets > 0  ? 1 : 0
+  vpc   = true
+  tags = {
+    Name = "${var.name}-nat-eip-${local.environment_ext}"
+  }
+}
+
+# NAT Gateways
+resource "aws_nat_gateway" "nat_gw" {
+  count = var.num_public_subnets > 0 && var.num_private_subnets > 0  ? 1 : 0
+  allocation_id = element(aws_eip.nat_eip, count.index).id
+  subnet_id = [for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][0].id
+  tags = {
+    Name = "${var.name}-nat-gw-${local.environment_ext}"
+  }
+}
+
+resource "aws_route_table" "private_subnets_route_table" {
+  count  = var.num_public_subnets > 0 && var.num_private_subnets > 0 ? 1 : 0
+  vpc_id = aws_vpc.this.id
+  tags = {
+    Name = "${var.name}-private-rt-${local.environment_ext}"
+  }
+}
+
+resource "aws_route" "private_internet_route" {
+  count = var.num_public_subnets > 0 && var.num_private_subnets > 0 ? 1 : 0
+  depends_on = [
+    aws_internet_gateway.this,
+    aws_route_table.private_subnets_route_table,
+  ]
+  route_table_id         = element(aws_route_table.private_subnets_route_table.*.id,  count.index)
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = element(aws_nat_gateway.nat_gw.*.id, count.index)
+}
+
+# Association of Route Table to Subnets
+resource "aws_route_table_association" "private_internet_route_table_associations" {
+  count     = var.num_public_subnets > 0 && var.num_private_subnets > 0 ? length([for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == false]) : 0
+  subnet_id = element([for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == false], count.index).id
+  route_table_id = element(
+    aws_route_table.private_subnets_route_table.*.id,
+    count.index,
+  )
 }

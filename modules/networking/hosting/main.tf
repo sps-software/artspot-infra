@@ -122,6 +122,8 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   }
 }
 
+// Need to fix these. There should be A/AAA records for both www. and non-www. domains
+
 resource "aws_route53_record" "www_cdn_A_record" {
   zone_id = var.route53_zone_id == null ? data.aws_route53_zone.main[0].id : var.route53_zone_id
   name = local.dub_domain

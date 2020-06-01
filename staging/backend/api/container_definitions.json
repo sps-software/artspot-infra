@@ -5,6 +5,14 @@
     "cpu": 128,
     "memory": 128,
     "essential": true,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+          "awslogs-group": "/ecs/hello-world",
+          "awslogs-region": "us-east-2",
+          "awslogs-stream-prefix": "fargate"
+      }
+    },
     "portMappings": [
       {
         "containerPort": 8081,

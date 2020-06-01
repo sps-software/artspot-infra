@@ -1,0 +1,4 @@
+
+[submodule "modules/terraform-aws-ecs-fargate-service"]
+	path = modules/terraform-aws-ecs-fargate-service
+	url = https://github.com/cn-terraform/terraform-aws-ecs-fargate-service.git

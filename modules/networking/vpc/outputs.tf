@@ -72,6 +72,25 @@ output "subnet_name_arn_map" {
   description = "a mapping of subnet ids to their corresponding arns"
 }
 
-output "aws_subnet" {
-  value = [for var in aws_subnet.this.* : var if var.map_public_ip_on_launch == true ]
+output "public_subnet_cidr_blocks" {
+  value = [for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][*].cidr_block
 }
+
+output "private_subnet_cidr_blocks" {
+  value = [for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == false][*].cidr_block
+}
+
+output "public_cidr_blocks_by_id" {
+  value = zipmap(
+    [for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][*].id,
+    [for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][*].cidr_block
+  )
+}
+
+output "private_cidr_blocks_by_id" {
+  value = zipmap(
+    [for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == false][*].id,
+    [for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == false][*].cidr_block
+  )
+}
+

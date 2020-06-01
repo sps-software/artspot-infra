@@ -1,3 +1,4 @@
+// This is the module for hosting the static web page
 
 locals {
   prod_domain = "www.${var.prod_site_name}"
