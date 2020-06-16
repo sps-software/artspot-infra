@@ -67,8 +67,6 @@ resource "aws_route_table" "this" {
 
 resource "aws_route_table_association" "prod-crta-public-subnet" {
   count          = var.num_public_subnets
-  // It would be better to do:[for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][count.index].id
-  // but terraform has a bug right now.
   subnet_id      = [for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][count.index].id
   route_table_id = var.custom_route_table_enabled ? aws_route_table.this[0].id : aws_vpc.this.default_route_table_id
 }

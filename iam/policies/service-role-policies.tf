@@ -93,7 +93,3 @@ resource "aws_iam_policy" "CodeBuildBasePolicy-artspot-web-build-us-east-2" {
       }
   )
 }
-
-# resource "aws_iam_role" "codebuild-artspot-web-build-service-role" {
-#   name = "codebuild-artspot-web-build-service-role"
-# }

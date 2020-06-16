@@ -5,6 +5,6 @@ resource "aws_lb" "this" {
   security_groups    = var.security_groups
   subnets            = var.subnets
 
-  enable_deletion_protection = true
+  enable_deletion_protection = var.deletion_protection
   tags = var.tags
 }

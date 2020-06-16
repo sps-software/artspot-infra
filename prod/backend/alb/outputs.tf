@@ -17,3 +17,7 @@ output "dns_name" {
 output "zone_id" {
   value = module.alb.zone_id
 }
+
+output "listener_arn" {
+  value = aws_lb_listener.artspot-api.arn
+}
