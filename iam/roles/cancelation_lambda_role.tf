@@ -29,6 +29,12 @@ resource "aws_iam_role_policy_attachment" "cancelation-lambda-role-attach-cloudw
   policy_arn = data.terraform_remote_state.policies.outputs.lambda-cloudwatch-access
 }
 
+resource "aws_iam_role_policy_attachment" "cancelation-lambda-role-attach-xray" {
+  role       = aws_iam_role.cancelation-lambda-role.name
+  policy_arn = data.terraform_remote_state.policies.outputs.lambda-xray-access
+}
+
+
 resource "aws_ssm_parameter" "cancelation_labda_role" {
   type = "String"
   name = "/artspot/iam/cancelation-lambda-role-staging"

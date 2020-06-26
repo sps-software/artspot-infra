@@ -9,3 +9,7 @@ output "cancelation-table-lambda-access-policy-staging" {
 output "lambda-cloudwatch-access" {
   value = aws_iam_policy.lambda-cloudwatch-access-policy.arn
 }
+
+output "lambda-xray-access" {
+  value = aws_iam_policy.lambda-xray-access-policy.arn
+}
