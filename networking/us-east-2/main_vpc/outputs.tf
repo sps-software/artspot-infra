@@ -40,8 +40,8 @@ output "default_security_group_id" {
 output "default_route_table_id" {
   value = module.main_vpc.default_route_table_id
   description = "The ID of the route table created by default on VPC creation"
-
 }
+
 output "private_subnet_ids" {
   value = module.main_vpc.private_subnet_ids
   description = "ids of all private subnets"
