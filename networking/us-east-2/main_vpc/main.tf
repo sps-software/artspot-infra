@@ -32,6 +32,15 @@ resource "aws_vpc_endpoint" "ecr-api" {
     data.terraform_remote_state.security_groups.outputs.ingress_443_private_subnets
   ]
 }
+    
+resource "aws_vpc_endpoint" "sns" {
+  vpc_id       = module.main_vpc.id
+  service_name = "com.amazonaws.us-east-2.sns"
+  vpc_endpoint_type = "Interface"
+   security_group_ids = [
+    data.terraform_remote_state.security_groups.outputs.vpc_endpoint_sns
+  ]
+}
 
 resource "aws_ssm_parameter" "private_subnet_a" {
   name        = "/demo/dev/vpc/private_subnet_a"
