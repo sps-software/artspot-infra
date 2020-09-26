@@ -22,6 +22,6 @@ output "user_pool_web_client_id" {
   value = module.cognito.user_pool_web_client_id
 }
 
-output "user_pool_integration_test_client_id" {
-  value = module.cognito.user_pool_integration_test_client_id
+output "user_pool_test_client_id" {
+  value = module.cognito.user_pool_web_client_test_id
 }
