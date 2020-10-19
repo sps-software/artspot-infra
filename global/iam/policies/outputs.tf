@@ -13,3 +13,11 @@ output "lambda-xray-access" {
 output "api-gateway-cloudwatch" {
   value = aws_iam_policy.api-gateway-cloudwatch-access-policy.arn
 }
+
+output "accounts_codebuild_role_policy" {
+  value = aws_iam_policy.accounts_codebuild_role_policy.arn
+}
+
+output "codepipeline_service_role_policy" {
+  value = aws_iam_policy.codepipeline_service_role_policy.arn
+}

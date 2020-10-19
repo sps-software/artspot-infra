@@ -82,3 +82,7 @@ output "public_cidr_blocks_by_id" {
 output "private_cidr_blocks_by_id" {
   value =  module.main_vpc.private_cidr_blocks_by_id
 }
+
+output "private_api_gateway_vpce_id" {
+  value = aws_vpc_endpoint.private_api_gateway.id
+}

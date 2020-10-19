@@ -1,5 +1,7 @@
+region="us-east-2"
 prod_domain="artspot.io"
 staging_domain="staging.artspot.io"
 auth_domain="auth.artspot.io"
 prod_api_domain="api.artspot.io"
 staging_api_domain="staging.api.artspot.io"
+dev_api_domain="dev.api.artspot.io"

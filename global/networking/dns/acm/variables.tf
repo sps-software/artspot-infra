@@ -17,3 +17,7 @@ variable "prod_api_domain" {
 variable "staging_api_domain" {
   type = string
 }
+
+variable "dev_api_domain" {
+  type = string
+}

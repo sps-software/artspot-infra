@@ -93,3 +93,4 @@ resource "aws_iam_policy" "CodeBuildBasePolicy-artspot-web-build-us-east-2" {
       }
   )
 }
+

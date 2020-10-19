@@ -2,13 +2,14 @@ locals {
   total_subnets   = var.num_private_subnets + var.num_public_subnets
   az_num_map      = { "0" = "a", "1" = "b", "2" = "c" }
   environment_ext = "${var.environment == "" ? "" : "-"}${var.environment == "" ? "" : var.environment}"
-  cidr_part_1_2   = regex("(\\d{1,3}.\\d{1,3}).\\d{1,3}.\\d{1,3}", var.vpc_cidr_block)[0]
+  cidr_part1   = regex("(\\d{1,3}).\\d{1,3}.\\d{1,3}.\\d{1,3}", var.vpc_cidr_block)[0]
+  cidr_part2   = regex("\\d{1,3}.(\\d{1,3}).\\d{1,3}.\\d{1,3}", var.vpc_cidr_block)[0]
   cidr_part3      = regex("\\d{1,3}.\\d{1,3}.(\\d{1,3}).\\d{1,3}", var.vpc_cidr_block)[0]
   cidr_part4      = regex("\\d{1,3}.\\d{1,3}.\\d{1,3}.(\\d{1,3})", var.vpc_cidr_block)[0]
 }
 
 locals {
-  auto_subnet_cidr_blocks = [for i in range(local.total_subnets) : "${local.cidr_part_1_2}.${tonumber(local.cidr_part3) + i}.${local.cidr_part4}/${var.subnet_cidr_block_ext}"]
+  auto_subnet_cidr_blocks = [for i in range(local.total_subnets) : "${local.cidr_part1}.${local.cidr_part2}.${tonumber(local.cidr_part3) + (16 * i)}.${local.cidr_part4}/${var.subnet_cidr_block_ext}"]
 }
 
 resource "aws_vpc" "this" {
