@@ -82,14 +82,14 @@ resource "aws_eip" "nat_eip" {
 }
 
 # NAT Gateways
-resource "aws_nat_gateway" "nat_gw" {
-  count = var.num_public_subnets > 0 && var.num_private_subnets > 0  ? 1 : 0
-  allocation_id = element(aws_eip.nat_eip, count.index).id
-  subnet_id = [for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][0].id
-  tags = {
-    Name = "${var.name}-nat-gw-${local.environment_ext}"
-  }
-}
+// resource "aws_nat_gateway" "nat_gw" {
+//   count = var.num_public_subnets > 0 && var.num_private_subnets > 0  ? 1 : 0
+//   allocation_id = element(aws_eip.nat_eip, count.index).id
+//   subnet_id = [for val in aws_subnet.this[*] : val if val.map_public_ip_on_launch == true][0].id
+//   tags = {
+//     Name = "${var.name}-nat-gw-${local.environment_ext}"
+//   }
+// }
 
 resource "aws_route_table" "private_subnets_route_table" {
   count  = var.num_public_subnets > 0 && var.num_private_subnets > 0 ? 1 : 0
@@ -99,16 +99,16 @@ resource "aws_route_table" "private_subnets_route_table" {
   }
 }
 
-resource "aws_route" "private_internet_route" {
-  count = var.num_public_subnets > 0 && var.num_private_subnets > 0 ? 1 : 0
-  depends_on = [
-    aws_internet_gateway.this,
-    aws_route_table.private_subnets_route_table,
-  ]
-  route_table_id         = element(aws_route_table.private_subnets_route_table.*.id,  count.index)
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = element(aws_nat_gateway.nat_gw.*.id, count.index)
-}
+// resource "aws_route" "private_internet_route" {
+//   count = var.num_public_subnets > 0 && var.num_private_subnets > 0 ? 1 : 0
+//   depends_on = [
+//     aws_internet_gateway.this,
+//     aws_route_table.private_subnets_route_table,
+//   ]
+//   route_table_id         = element(aws_route_table.private_subnets_route_table.*.id,  count.index)
+//   destination_cidr_block = "0.0.0.0/0"
+//   nat_gateway_id         = element(aws_nat_gateway.nat_gw.*.id, count.index)
+// }
 
 # Association of Route Table to Subnets
 resource "aws_route_table_association" "private_internet_route_table_associations" {

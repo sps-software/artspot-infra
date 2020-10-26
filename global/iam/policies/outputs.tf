@@ -21,3 +21,7 @@ output "accounts_codebuild_role_policy" {
 output "codepipeline_service_role_policy" {
   value = aws_iam_policy.codepipeline_service_role_policy.arn
 }
+
+output "deploy_accounts_api_role_policy" {
+  value = aws_iam_policy.deploy_accounts_api_role_policy.arn
+}

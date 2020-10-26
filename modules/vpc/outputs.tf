@@ -13,6 +13,16 @@ output "main_route_table_id" {
   description = "vpc main route table id"
 }
 
+output "public_route_table_id" {
+  value       = var.custom_route_table_enabled ? aws_route_table.this[0].id : aws_vpc.this.default_route_table_id
+  description = "vpc main route table id"
+}
+
+output "private_route_table_id" {
+  value       = aws_route_table.private_subnets_route_table.id
+  description = "vpc main route table id"
+}
+
 output "ipv6_association_id" {
   value       = aws_vpc.this.ipv6_association_id
   description = "The association ID for the IPv6 CIDR block"
