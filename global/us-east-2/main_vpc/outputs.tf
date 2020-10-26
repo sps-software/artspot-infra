@@ -13,6 +13,16 @@ output "main_route_table_id" {
   description = "vpc main route table id"
 }
 
+output "public_route_table_id" {
+  value       = module.main_vpc.public_route_table_id
+  description = "vpc main route table id"
+}
+
+output "private_route_table_id" {
+  value       = module.main_vpc.public_route_table_id
+  description = "vpc main route table id"
+}
+
 output "cidr_block" {
   value = module.main_vpc.cidr_block
   description = "The IPv4 CIDR block of the VPC"

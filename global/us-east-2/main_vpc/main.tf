@@ -43,11 +43,24 @@ resource "aws_vpc_endpoint" "sns" {
   ]
 }
 
-// resource "aws_vpc_endpoint" "dynamodb" {
-//   vpc_id       = module.main_vpc.id
-//   service_name = "com.amazonaws.us-east-2.dynamodb"
-//   vpc_endpoint_type = "Gateway"
-// }
+resource "aws_vpc_endpoint" "dynamodb_endpoint" {
+  vpc_id       = module.main_vpc.id
+  service_name = "com.amazonaws.us-east-2.dynamodb"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids = [module.main_vpc.main_route_table_id]
+    policy = <<POLICY
+    {
+    "Statement": [
+        {
+        "Action": "*",
+        "Effect": "Allow",
+        "Resource": "*",
+        "Principal": "*"
+        }
+    ]
+    }
+    POLICY
+}
 
 resource "aws_vpc_endpoint" "private_api_gateway" {
   vpc_id       = module.main_vpc.id
@@ -175,6 +188,14 @@ resource "aws_ssm_parameter" "demo_vpc_private_api_gateway_endpoint" {
   type        = "String"
   value       = aws_vpc_endpoint.private_api_gateway.id
 }
+
+resource "aws_ssm_parameter" "dynamodb_endpoint" {
+  name        = "/artspot/vpc/dynamodb_endpoint/id"
+  description = "dynamodb vpc endpoint"
+  type        = "String"
+  value       = aws_vpc_endpoint.dynamodb_endpoint.id
+}
+
 
 // resource "aws_ssm_parameter" "vpc_private_api_gateway_endpoint_2" {
 //   name        = "/artspot/vpc/private_api_gateway_endpoint_2/id"
