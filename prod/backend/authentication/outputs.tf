@@ -21,3 +21,7 @@ output "user_pool_domain_s3_bucket" {
 output "user_pool_web_client_id" {
   value = module.cognito.user_pool_web_client_id
 }
+
+output "user_pool_test_client_id" {
+  value = module.cognito.user_pool_web_client_test_id
+}

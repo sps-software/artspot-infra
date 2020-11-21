@@ -15,12 +15,12 @@ output "main_route_table_id" {
 
 output "public_route_table_id" {
   value       = module.main_vpc.public_route_table_id
-  description = "vpc main route table id"
+  description = "custom public route table id"
 }
 
 output "private_route_table_id" {
-  value       = module.main_vpc.public_route_table_id
-  description = "vpc main route table id"
+  value       = module.main_vpc.private_route_table_id
+  description = "private route table id"
 }
 
 output "cidr_block" {

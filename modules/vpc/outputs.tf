@@ -15,12 +15,12 @@ output "main_route_table_id" {
 
 output "public_route_table_id" {
   value       = var.custom_route_table_enabled ? aws_route_table.this[0].id : aws_vpc.this.default_route_table_id
-  description = "vpc main route table id"
+  description = "public route table id"
 }
 
 output "private_route_table_id" {
-  value       = aws_route_table.private_subnets_route_table.id
-  description = "vpc main route table id"
+  value       = var.num_public_subnets > 0 && var.num_private_subnets > 0 ? aws_route_table.private_subnets_route_table[0].id : null
+  description = "private route table id"
 }
 
 output "ipv6_association_id" {

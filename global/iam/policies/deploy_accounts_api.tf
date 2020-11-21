@@ -2,6 +2,19 @@ data "aws_route53_zone" "artspot" {
   name         = "artspot.io"
 }
 
+data "aws_cognito_user_pools" "dev" {
+  name = "artists-dev"
+}
+
+data "aws_cognito_user_pools" "staging" {
+  name = "artists-staging"
+}
+
+data "aws_cognito_user_pools" "prod" {
+  name = "artists-prod"
+}
+
+
 resource "aws_iam_policy" "deploy_accounts_api_role_policy" {
     name        = "deploy_accounts_api_role_policy"
   description = "Accounts API deplot policy"
@@ -56,9 +69,9 @@ resource "aws_iam_policy" "deploy_accounts_api_role_policy" {
                 ]
                 Effect   = "Allow"
                 Resource = [
-                    "arn:aws:cognito-idp:us-east-2:455728032032:userpool/us-east-2_9y6GE449b", #dev TODO: grab these from state
-                    "arn:aws:cognito-idp:us-east-2:455728032032:userpool/us-east-2_wkPGgHFJp", #staging 
-                    "arn:aws:cognito-idp:us-east-2:455728032032:userpool/us-east-2_MSR05HR63"  #prod
+                    "arn:aws:cognito-idp:us-east-2:455728032032:userpool/${tolist(data.aws_cognito_user_pools.dev.ids)[0]}", 
+                    "arn:aws:cognito-idp:us-east-2:455728032032:userpool/${tolist(data.aws_cognito_user_pools.staging.ids)[0]}", 
+                    "arn:aws:cognito-idp:us-east-2:455728032032:userpool/${tolist(data.aws_cognito_user_pools.prod.ids)[0]}"
                 ]
             },
             # serverless domain manager
@@ -77,6 +90,15 @@ resource "aws_iam_policy" "deploy_accounts_api_role_policy" {
                     "apigateway:DELETE",
                     "apigateway:POST",
                     "apigateway:PATCH"
+                ]
+                Effect   = "Allow"
+                Resource = [
+                    "*",
+                ]
+            },
+             {
+                Action   = [
+                    "execute-api:Invoke"
                 ]
                 Effect   = "Allow"
                 Resource = [
@@ -114,10 +136,10 @@ resource "aws_iam_policy" "deploy_accounts_api_role_policy" {
                 Resource = [
                     "arn:aws:s3:::artspot-accounts-api-dev-serverlessdeploymentbuck-*",
                     "arn:aws:s3:::artspot-accounts-api-dev-serverlessdeploymentbuck-*/*",
-                    "arn:aws:s3:::artspot-accounts-api-staging-serverlessdeploymentbuck-*",
-                    "arn:aws:s3:::artspot-accounts-api-staging-serverlessdeploymentbuck-*/*",
-                    "arn:aws:s3:::artspot-accounts-api-prod-serverlessdeploymentbuck-*",
-                    "arn:aws:s3:::artspot-accounts-api-prod-serverlessdeploymentbuck-*/*"
+                    "arn:aws:s3:::artspot-accounts-api-sta-serverlessdeploymentbuck-*",
+                    "arn:aws:s3:::artspot-accounts-api-sta-serverlessdeploymentbuck-*/*",
+                    "arn:aws:s3:::artspot-accounts-api-pro-serverlessdeploymentbuck-*",
+                    "arn:aws:s3:::artspot-accounts-api-pro-serverlessdeploymentbuck-*/*"
                 ]
             },
               {
@@ -168,12 +190,12 @@ resource "aws_iam_policy" "deploy_accounts_api_role_policy" {
                     "arn:aws:iam::455728032032:role/artspot/dev/serviceRoles/CancelationInitiateLambdaRole-dev",
                     "arn:aws:iam::455728032032:role/artspot/dev/serviceRoles/CancelationSurveyLambdaRole-dev",
                     "arn:aws:iam::455728032032:role/artspot/dev/serviceRoles/CancelationStatusLambdaRole-dev",
-                    "arn:aws:iam::455728032032:role/artspot/dev/serviceRoles/CancelationInitiateLambdaRole-staging",
-                    "arn:aws:iam::455728032032:role/artspot/dev/serviceRoles/CancelationSurveyLambdaRole-staging",
-                    "arn:aws:iam::455728032032:role/artspot/dev/serviceRoles/CancelationStatusLambdaRole-staging",
-                    "arn:aws:iam::455728032032:role/artspot/dev/serviceRoles/CancelationInitiateLambdaRole-prod",
-                    "arn:aws:iam::455728032032:role/artspot/dev/serviceRoles/CancelationSurveyLambdaRole-prod",
-                    "arn:aws:iam::455728032032:role/artspot/dev/serviceRoles/CancelationStatusLambdaRole-prod"
+                    "arn:aws:iam::455728032032:role/artspot/staging/serviceRoles/CancelationInitiateLambdaRole-staging",
+                    "arn:aws:iam::455728032032:role/artspot/staging/serviceRoles/CancelationSurveyLambdaRole-staging",
+                    "arn:aws:iam::455728032032:role/artspot/staging/serviceRoles/CancelationStatusLambdaRole-staging",
+                    "arn:aws:iam::455728032032:role/artspot/prod/serviceRoles/CancelationInitiateLambdaRole-prod",
+                    "arn:aws:iam::455728032032:role/artspot/prod/serviceRoles/CancelationSurveyLambdaRole-prod",
+                    "arn:aws:iam::455728032032:role/artspot/prod/serviceRoles/CancelationStatusLambdaRole-prod"
                 ]
             },
              {

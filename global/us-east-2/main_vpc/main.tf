@@ -47,7 +47,7 @@ resource "aws_vpc_endpoint" "dynamodb_endpoint" {
   vpc_id       = module.main_vpc.id
   service_name = "com.amazonaws.us-east-2.dynamodb"
   vpc_endpoint_type = "Gateway"
-  route_table_ids = [module.main_vpc.main_route_table_id]
+  route_table_ids = [module.main_vpc.private_route_table_id]
     policy = <<POLICY
     {
     "Statement": [
